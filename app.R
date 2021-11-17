@@ -28,14 +28,14 @@ ui <- fluidPage(
                                               "Temp_Celsius",
                                               "X_Fe_OPX",
                                               "X_Fe_CPX"),
-                        selected = "Temp_Celsius"),
+                        selected = "point_location_CPX"),
             
-            selectInput("y_axis", "y-axis data", choices = c("point_location_CPX",
+                        selectInput("y_axis", "y-axis data", choices = c("point_location_CPX",
                                               "point_location_OPX",
                                               "Temp_Celsius",
                                               "X_Fe_OPX",
                                               "X_Fe_CPX"),
-                        selected = "point_location_CPX"),
+                        selected = "Temp_Celsius"),
             
             radioButtons("full_table", "Show Full Table of Calulations",
                          c("yes"= "yes",
