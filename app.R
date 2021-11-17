@@ -59,19 +59,19 @@ ui <- fluidPage(
                    Label you columns exactly as shown. 
                    The calculations will not execute properly unless you do this step.
                    For your convenience the column names are listed here: 
-                   point_location_CPX
-                   point_location_OPX
-                   Nb_ions_Mg_CPX
-                   Nb_ions_Mg_OPX
-                   Nb_ions_Fe_CPX
-                   Nb_ions_Fe_OPX
-                   Nb_ions_Ca_CPX
-                   Nb_ions_Ca_OPX
-                   Nb_ions_Na_CPX
-                   Nb_ions_Na_OPX
+                   1. point_location_CPX
+                   2. point_location_OPX
+                   3. Nb_ions_Mg_CPX
+                   4. Nb_ions_Mg_OPX
+                   5. Nb_ions_Fe_CPX
+                   6. Nb_ions_Fe_OPX
+                   7. Nb_ions_Ca_CPX
+                   8. Nb_ions_Ca_OPX
+                   9. Nb_ions_Na_CPX
+                   10. Nb_ions_Na_OPX
                    upload you table in a csv format.
                    "),
-                 img(src = "images/batman_and_ace.jpg", height = 100, width = 100))   
+                 img(src = "batman_and_ace.jpg", height = 500, width = 500))   
         )
         )
     ))
