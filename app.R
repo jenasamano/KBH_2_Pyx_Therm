@@ -27,14 +27,18 @@ ui <- fluidPage(
                                               "point_location_OPX",
                                               "Temp_Celsius",
                                               "X_Fe_OPX",
-                                              "X_Fe_CPX"),
-                        selected = "point_location_CPX"),
+                                              "X_Fe_CPX",
+                                              "point_number_OPX",
+                                              "point_number_CPX"),
+                        selected = "point_number_CPX"),
             
                         selectInput("y_axis", "y-axis data", choices = c("point_location_CPX",
                                               "point_location_OPX",
                                               "Temp_Celsius",
                                               "X_Fe_OPX",
-                                              "X_Fe_CPX"),
+                                              "X_Fe_CPX",
+                                              "point_number_OPX",
+                                              "point_number_CPX"),
                         selected = "Temp_Celsius"),
             
             radioButtons("full_table", "Show Full Table of Calulations",
@@ -114,6 +118,7 @@ server <- function(input, output){
                                        T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
                                        Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
                                        Temp_Celsius = Temp_Kelvins-273.15)
+        samp_data_prototypeT
         
         display_table <- select(samp_data_prototypeT,
                                 point_location_CPX,
@@ -142,7 +147,10 @@ server <- function(input, output){
         
         ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
       geom_point()+
+          theme_classic()+
+          labs(x="Point Number of ______", y="Temperature in Celsius")+
           geom_smooth(method="lm")
+          
       
     }})
     
