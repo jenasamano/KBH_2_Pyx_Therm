@@ -55,11 +55,26 @@ ui <- fluidPage(
             
           ),
         tabPanel("Instructions", 
-                 p("instructions go here in this format"),
-                 img(src = "images/test_image.png", height = 100, width = 100))   
+                 p("It is vital your uploaded table is in the same format as the table shown here. 
+                   Label you columns exactly as shown. 
+                   The calculations will not execute properly unless you do this step.
+                   For your convenience the column names are listed here: 
+                   point_location_CPX
+                   point_location_OPX
+                   Nb_ions_Mg_CPX
+                   Nb_ions_Mg_OPX
+                   Nb_ions_Fe_CPX
+                   Nb_ions_Fe_OPX
+                   Nb_ions_Ca_CPX
+                   Nb_ions_Ca_OPX
+                   Nb_ions_Na_CPX
+                   Nb_ions_Na_OPX
+                   upload you table in a csv format.
+                   "),
+                 img(src = "images/batman_and_ace.jpg", height = 100, width = 100))   
         )
-        ))
-    )
+        )
+    ))
 
 
 # Define server logic required to draw a histogram
