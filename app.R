@@ -1,14 +1,10 @@
-#
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+
+# 11-19-21 in the plot the point numbers are all mixed up and not in order 1-15.
+# 11-19-21 how to make each different slider talk to the indiv plots
 
 library(shiny)
 library(tidyverse)
+library(patchwork)
 
 
 # Define UI for application that draws a histogram
@@ -39,6 +35,23 @@ ui <- fluidPage(
                                               "point_number_OPX",
                                               "point_number_CPX"),
                         selected = "Temp_Celsius"),
+            selectInput("x_axis", "X-axis data", choices = c("point_location_CPX",
+                                                             "point_location_OPX",
+                                                             "Temp_Celsius",
+                                                             "X_Fe_OPX",
+                                                             "X_Fe_CPX",
+                                                             "point_number_OPX",
+                                                             "point_number_CPX"),
+                        selected = "point_number_CPX"),
+            
+            selectInput("y_axis", "y-axis data", choices = c("point_location_CPX",
+                                                             "point_location_OPX",
+                                                             "Temp_Celsius",
+                                                             "X_Fe_OPX",
+                                                             "X_Fe_CPX",
+                                                             "point_number_OPX",
+                                                             "point_number_CPX"),
+                        selected = "Temp_Celsius"),
             
             radioButtons("full_table", "Show Full Table of Calulations",
                          c("yes"= "yes",
@@ -64,17 +77,29 @@ ui <- fluidPage(
                    For your convenience the column names are listed here: 
                    1. point_location_CPX
                    2. point_location_OPX
-                   3. Nb_ions_Mg_CPX
-                   4. Nb_ions_Mg_OPX
-                   5. Nb_ions_Fe_CPX
-                   6. Nb_ions_Fe_OPX
-                   7. Nb_ions_Ca_CPX
-                   8. Nb_ions_Ca_OPX
-                   9. Nb_ions_Na_CPX
-                   10. Nb_ions_Na_OPX
+                   3. point_number_CPX
+                   4. point_number_OPX
+                   5. Nb_ions_Mg_CPX
+                   6 Nb_ions_Mg_OPX
+                   7. Nb_ions_Fe_CPX
+                   8 Nb_ions_Fe_OPX
+                   9. Nb_ions_Ca_CPX
+                   10. Nb_ions_Ca_OPX
+                   11. Nb_ions_Na_CPX
+                   12. Nb_ions_Na_OPX
                    upload you table in a csv format.
-                   "),
-                 img(src = "batman_and_ace.jpg", height = 500, width = 500))   
+                   
+                   You will need to clean and arrange your data from the microbrobe.
+                   
+                   your data number points for the microprobe are usually in the form: 2/1.
+                   R will not recognize this form and you will need to re-number
+                   them to a whole integer.
+                   
+                   You must use the Nb of ions from the microprobe data.
+                   This code assumes you have used the correct analysis tool and will
+                   treat values as correct."),
+                 
+                 img(src = "proper_format.jpg", height = 900, width = 1500))   
         )
         )
     ))
@@ -151,22 +176,45 @@ server <- function(input, output){
           r_y_axis <- as.symbol(input$y_axis)
           
         })
-        axis_names <- data.frame(column_names=c("point_location_CPX",
+        x_axis_names <- data.frame(column_names=c("point_location_CPX",
           "point_location_OPX",
           "Temp_Celsius",
           "X_Fe_OPX",
           "X_Fe_CPX",
           "point_number_OPX",
           "point_number_CPX"),
-          axis_names=c("Location of Point CPX","Location of Point OPX",
+          x_axis_names=c("Location of Point CPX","Location of Point OPX",
                        "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
                        "Point number CPX", "Point number OPX"))
-        x_axis_label <- axis_names[axis_names$column_names==input$x_axis,"axis_names"]
-        ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
+        x_axis_label <- x_axis_names[x_axis_names$column_names==input$x_axis,"x_axis_names"]
+        
+        #DO for y-axis what you did for x-axis with this code"
+        y_axis_names <- data.frame(column_names=c("point_location_CPX",
+                                                "point_location_OPX",
+                                                "Temp_Celsius",
+                                                "X_Fe_OPX",
+                                                "X_Fe_CPX",
+                                                "point_number_OPX",
+                                                "point_number_CPX"),
+                                 y_axis_names=c("Location of Point CPX","Location of Point OPX",
+                                              "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
+                                              "Point number CPX", "Point number OPX"))
+        y_axis_label <- y_axis_names[y_axis_names$column_names==input$y_axis,"y_axis_names"]
+        
+       
+         plot_1 <- ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
       geom_point()+
           theme_classic()+
-          labs(x= x_axis_label, y= "Temperature in Celsius")+
+          labs(x= x_axis_label, y= y_axis_label)+
           geom_smooth(method="lm")
+           
+           plot_2 <- ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
+           geom_point()+
+           theme_classic()+
+           labs(x= x_axis_label, y= y_axis_label)+
+           geom_smooth(method="lm")
+           
+           plot_1+plot_2
           
       
     }})
