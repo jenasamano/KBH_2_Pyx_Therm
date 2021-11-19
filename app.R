@@ -8,9 +8,8 @@
 #
 
 library(shiny)
-library(flexdashboard)
 library(tidyverse)
-library(janitor)
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -98,6 +97,12 @@ server <- function(input, output){
         if(is.null(input$uploaded_data)) return(NULL)
         else{
           samp_data_prototypeT <- read.csv(uploaded_file$datapath, header = TRUE) 
+          if(ncol(samp_data_prototypeT)!= 12){
+            print("Incorrect number of columns provided. Please see instructions")
+          }
+          else{
+            
+          
           names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"point_location_CPX")] <- "point_location_CPX"
        samp_data_prototypeT <- mutate(samp_data_prototypeT,X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
         samp_data_prototypeT
@@ -126,11 +131,13 @@ server <- function(input, output){
                                 Temp_Celsius,
                                 Temp_Kelvins,
                                 X_Fe_CPX,
-                                X_Fe_OPX)
+                                X_Fe_OPX,
+                                point_number_CPX,
+                                point_number_OPX)
         if(input$full_table=="yes") samp_data_prototypeT
         else display_table
         }    
-    })
+    }})
     output$location_Temp <- renderPlot({
       if(is.null(input$uploaded_data)) return(NULL)
       else{
@@ -144,11 +151,21 @@ server <- function(input, output){
           r_y_axis <- as.symbol(input$y_axis)
           
         })
-        
+        axis_names <- data.frame(column_names=c("point_location_CPX",
+          "point_location_OPX",
+          "Temp_Celsius",
+          "X_Fe_OPX",
+          "X_Fe_CPX",
+          "point_number_OPX",
+          "point_number_CPX"),
+          axis_names=c("Location of Point CPX","Location of Point OPX",
+                       "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
+                       "Point number CPX", "Point number OPX"))
+        x_axis_label <- axis_names[axis_names$column_names==input$x_axis,"axis_names"]
         ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
       geom_point()+
           theme_classic()+
-          labs(x="Point Number of ______", y="Temperature in Celsius")+
+          labs(x= x_axis_label, y= "Temperature in Celsius")+
           geom_smooth(method="lm")
           
       
