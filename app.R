@@ -18,7 +18,7 @@ ui <- fluidPage(
         sidebarPanel(
             sliderInput("Pressure", "Pressure in kilobars:", min = 1, max = 20, value = 1),
             fileInput("uploaded_data", "Upload Electron Microprobe data", accept = ".csv"),
-            selectInput("x_axis", "X-axis data", choices = c("point_location_CPX",
+            selectInput("x_axis", "Left Graph X-axis data", choices = c("point_location_CPX",
                                               "point_location_OPX",
                                               "Temp_Celsius",
                                               "X_Fe_OPX",
@@ -27,7 +27,7 @@ ui <- fluidPage(
                                               "point_number_CPX"),
                         selected = "point_number_CPX"),
             
-                        selectInput("y_axis", "y-axis data", choices = c("point_location_CPX",
+                        selectInput("y_axis", "Left Graph y-axis data", choices = c("point_location_CPX",
                                               "point_location_OPX",
                                               "Temp_Celsius",
                                               "X_Fe_OPX",
@@ -35,23 +35,7 @@ ui <- fluidPage(
                                               "point_number_OPX",
                                               "point_number_CPX"),
                         selected = "Temp_Celsius"),
-            selectInput("x_axis", "X-axis data", choices = c("point_location_CPX",
-                                                             "point_location_OPX",
-                                                             "Temp_Celsius",
-                                                             "X_Fe_OPX",
-                                                             "X_Fe_CPX",
-                                                             "point_number_OPX",
-                                                             "point_number_CPX"),
-                        selected = "point_number_CPX"),
             
-            selectInput("y_axis", "y-axis data", choices = c("point_location_CPX",
-                                                             "point_location_OPX",
-                                                             "Temp_Celsius",
-                                                             "X_Fe_OPX",
-                                                             "X_Fe_CPX",
-                                                             "point_number_OPX",
-                                                             "point_number_CPX"),
-                        selected = "Temp_Celsius"),
             
             radioButtons("full_table", "Show Full Table of Calulations",
                          c("yes"= "yes",
@@ -164,8 +148,33 @@ server <- function(input, output){
         }    
     }})
     output$location_Temp <- renderPlot({
+      uploaded_file <- input$uploaded_data
+      
       if(is.null(input$uploaded_data)) return(NULL)
       else{
+        samp_data_prototypeT <- read.csv(uploaded_file$datapath, header = TRUE) 
+        
+          
+          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"point_location_CPX")] <- "point_location_CPX"
+          samp_data_prototypeT <- mutate(samp_data_prototypeT,X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
+          samp_data_prototypeT
+          
+          Pressure <- input$Pressure
+          
+          samp_data_prototypeT <- mutate(samp_data_prototypeT,
+                                         X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
+                                         Ca_star_CPX = Nb_ions_Ca_CPX/(1-Nb_ions_Na_CPX),
+                                         Ca_star_OPX = Nb_ions_Ca_OPX/(1-Nb_ions_Na_OPX),
+                                         K_sub_D = (1-Ca_star_CPX)/(1-Ca_star_OPX),
+                                         onehundredtwentysix_times_X_Fe_CPX=126.3*X_Fe_CPX,
+                                         plustwentyfour = onehundredtwentysix_times_X_Fe_CPX+24.9,
+                                         times_pressure = plustwentyfour*Pressure,
+                                         T_bacon_numerator = 23664 + times_pressure,
+                                         ln_K_sub_D = log(K_sub_D),
+                                         ln_K_sub_D_SQRD = ln_K_sub_D^2,
+                                         T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
+                                         Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
+                                         Temp_Celsius = Temp_Kelvins-273.15)
         
         r_x_axis <- reactive({
           r_x_axis <- as.symbol(input$x_axis)
@@ -175,7 +184,9 @@ server <- function(input, output){
         r_y_axis <- reactive({
           r_y_axis <- as.symbol(input$y_axis)
           
-        })
+          })
+        
+       
         x_axis_names <- data.frame(column_names=c("point_location_CPX",
           "point_location_OPX",
           "Temp_Celsius",
@@ -185,9 +196,10 @@ server <- function(input, output){
           "point_number_CPX"),
           x_axis_names=c("Location of Point CPX","Location of Point OPX",
                        "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
-                       "Point number CPX", "Point number OPX"))
+                       "Point number OPX", "Point number CPX"))
         x_axis_label <- x_axis_names[x_axis_names$column_names==input$x_axis,"x_axis_names"]
         
+       
         #DO for y-axis what you did for x-axis with this code"
         y_axis_names <- data.frame(column_names=c("point_location_CPX",
                                                 "point_location_OPX",
@@ -198,25 +210,17 @@ server <- function(input, output){
                                                 "point_number_CPX"),
                                  y_axis_names=c("Location of Point CPX","Location of Point OPX",
                                               "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
-                                              "Point number CPX", "Point number OPX"))
+                                              "Point number OPX", "Point number CPX"))
         y_axis_label <- y_axis_names[y_axis_names$column_names==input$y_axis,"y_axis_names"]
         
-       
-         plot_1 <- ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
+      plot_1 <- ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
       geom_point()+
           theme_classic()+
           labs(x= x_axis_label, y= y_axis_label)+
+        theme(axis.title = element_text(size = 20),
+              axis.text = element_text(size=16))+
           geom_smooth(method="lm")
-           
-           plot_2 <- ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
-           geom_point()+
-           theme_classic()+
-           labs(x= x_axis_label, y= y_axis_label)+
-           geom_smooth(method="lm")
-           
-           plot_1+plot_2
-          
-      
+      plot_1
     }})
     
 }
