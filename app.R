@@ -1,4 +1,5 @@
 # Add standard deviation info 11/29
+# Is this thing on?
 
 library(shiny)
 library(tidyverse)
