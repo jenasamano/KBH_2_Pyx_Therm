@@ -1,6 +1,4 @@
-
-# 11-19-21 in the plot the point numbers are all mixed up and not in order 1-15.
-# 11-19-21 how to make each different slider talk to the indiv plots
+# Add standard deviation info 11/29
 
 library(shiny)
 library(tidyverse)
@@ -39,7 +37,8 @@ ui <- fluidPage(
             
             radioButtons("full_table", "Show Full Table of Calulations",
                          c("yes"= "yes",
-                           "no" = "no"), selected = "no")
+                           "no" = "no"), selected = "no"),
+            downloadButton("download_data","Download Temperature in CSV")
         ),
 
         # Show a table and plot of the generated distribution
@@ -131,7 +130,8 @@ server <- function(input, output){
                                        ln_K_sub_D_SQRD = ln_K_sub_D^2,
                                        T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
                                        Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
-                                       Temp_Celsius = Temp_Kelvins-273.15)
+                                       Temp_Celsius = Temp_Kelvins-273.15) %>% 
+          filter(!is.na(Temp_Kelvins))
         samp_data_prototypeT
         
         display_table <- select(samp_data_prototypeT,
@@ -147,6 +147,57 @@ server <- function(input, output){
         else display_table
         }    
     }})
+    output$download_data <- downloadHandler(
+      filename = function() {
+        "Bacon_Temps.csv"
+      },
+      content = function(file) {
+        uploaded_file <- input$uploaded_data
+        
+        if (is.null(input$uploaded_data))
+          return(NULL)
+        else{
+          samp_data_prototypeT <-
+            read.csv(uploaded_file$datapath, header = TRUE)
+          
+          
+          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT), "point_location_CPX")] <-
+            "point_location_CPX"
+          samp_data_prototypeT <-
+            mutate(samp_data_prototypeT,
+                   X_Fe_CPX = Nb_ions_Fe_CPX / (Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
+          samp_data_prototypeT
+          
+          Pressure <- input$Pressure
+          
+          samp_data_prototypeT <- mutate(
+            samp_data_prototypeT,
+            X_Fe_OPX = Nb_ions_Fe_OPX / (Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
+            Ca_star_CPX = Nb_ions_Ca_CPX /
+              (1 - Nb_ions_Na_CPX),
+            Ca_star_OPX = Nb_ions_Ca_OPX /
+              (1 - Nb_ions_Na_OPX),
+            K_sub_D = (1 - Ca_star_CPX) / (1 -
+                                             Ca_star_OPX),
+            onehundredtwentysix_times_X_Fe_CPX =
+              126.3 * X_Fe_CPX,
+            plustwentyfour = onehundredtwentysix_times_X_Fe_CPX +
+              24.9,
+            times_pressure = plustwentyfour *
+              Pressure,
+            T_bacon_numerator = 23664 + times_pressure,
+            ln_K_sub_D = log(K_sub_D),
+            ln_K_sub_D_SQRD = ln_K_sub_D ^
+              2,
+            T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
+            Temp_Kelvins = T_bacon_numerator /
+              T_bacon_denominator,
+            Temp_Celsius = Temp_Kelvins - 273.15
+          ) %>% 
+            filter(!is.na(Temp_Kelvins))}
+          write.csv(samp_data_prototypeT, file, row.names = FALSE)
+        }
+    )
     output$location_Temp <- renderPlot({
       uploaded_file <- input$uploaded_data
       
