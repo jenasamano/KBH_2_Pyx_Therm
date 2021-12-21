@@ -57,7 +57,7 @@ ui <- fluidPage(
         tabPanel("Instructions", # I'd probably put this text in a separate function. Note also that it isn't using markdown
                  includeMarkdown("instructions.md"),
                  
-                 img(src = "proper_format.jpg", height = 900, width = 1500))   
+                   img(src = "example_file.png", height = 213, width = 570))   
         )
         )
     ))
