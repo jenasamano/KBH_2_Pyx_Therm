@@ -20,10 +20,10 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput("pressure", "Pressure in kilobars:", min = 1, max = 20, value = 1),
       fileInput("uploaded_data", "Upload Electron Microprobe data", accept = ".csv"),
-      x_axis_selector(),
-      y_axis_selector(),
-      show_full_calcs_selector(),
-      downloadButton("download_data","Download Temperature in CSV"),
+      axis_selector(inputId = "x_axis", label = "Left Graph X-axis data"),
+      axis_selector(inputId = "y_axis", label = "Left Graph Y-axis data"),
+      show_full_calcs_selector(inputId = "full_table", label = "Show full table of calculations"),
+      downloadButton(inputId = "download_data", inputId = "Download Temperature in CSV"),
       actionButton(inputId = "ternary_plot", label = "Print ternary plot") # THIS IS JUST A TEST
     ),
     
