@@ -47,11 +47,11 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output){
   
-  output$contents <-renderTable({
-    uploaded_file <- input$uploaded_data
-    if(is.null(uploaded_file)) return(NULL)
-    read.csv(uploaded_file$datapath, header = TRUE)
-  })
+  # output$contents <-renderTable({
+  #   uploaded_file <- input$uploaded_data
+  #   if(is.null(uploaded_file)) return(NULL)
+  #   read.csv(uploaded_file$datapath, header = TRUE)
+  # })
   
   output$samp_data_prototypeT <- renderTable({
     
