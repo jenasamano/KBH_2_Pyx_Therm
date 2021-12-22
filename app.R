@@ -20,6 +20,7 @@ ui <- fluidPage(
     sidebarPanel(
       sliderInput("pressure", "Pressure in kilobars:", min = 1, max = 20, value = 1),
       fileInput("uploaded_data", "Upload Electron Microprobe data", accept = ".csv"),
+      thermometer_selector(inputId = "thermometer", label = "In Communist Russia, thermometer choose you"),
       axis_selector(inputId = "x_axis", label = "Left Graph X-axis data"),
       axis_selector(inputId = "y_axis", label = "Left Graph Y-axis data"),
       show_full_calcs_selector(inputId = "full_table", label = "Show full table of calculations"),
@@ -47,15 +48,51 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output){
   
-  # output$contents <-renderTable({
-  #   uploaded_file <- input$uploaded_data
-  #   if(is.null(uploaded_file)) return(NULL)
-  #   read.csv(uploaded_file$datapath, header = TRUE)
-  # })
+  thermometer <- reactive(input$thermometer)
   
+  # upload the data separately in its own reactive
+  raw_data <- reactive({ 
+    
+    # get data file
+    raw_datafile <- input$uploaded_data
+    
+    # Read data
+    if(is.null(input$raw_datafile)) return(NULL) # I don't like return statements...
+    # But since we have a return statement, we don't need the else
+    
+    # What does this do?
+    names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"point_location_CPX")] <- "point_location_CPX"
+    
+    processed_data <- switch(input$
+      
+    )
+    
+    
+    
+    samp_data_prototypeT <- mutate(samp_data_prototypeT,
+                                   X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
+    X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
+    Ca_star_CPX = Nb_ions_Ca_CPX/(1-Nb_ions_Na_CPX),
+    Ca_star_OPX = Nb_ions_Ca_OPX/(1-Nb_ions_Na_OPX),
+    K_sub_D = (1-Ca_star_CPX)/(1-Ca_star_OPX),
+    onehundredtwentysix_times_X_Fe_CPX=126.3*X_Fe_CPX,
+    plustwentyfour = onehundredtwentysix_times_X_Fe_CPX+24.9,
+    times_pressure = plustwentyfour*Pressure,
+    T_bacon_numerator = 23664 + times_pressure,
+    ln_K_sub_D = log(K_sub_D),
+    ln_K_sub_D_SQRD = ln_K_sub_D^2,
+    T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
+    Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
+    Temp_Celsius = Temp_Kelvins-273.15) %>% 
+    filter(!is.na(Temp_Kelvins))
+    
+    
+    })
+  
+  # Create table of temperatures
   output$samp_data_prototypeT <- renderTable({
     
-    uploaded_file <- input$uploaded_data
+    
     
     if(is.null(input$uploaded_data)) return(NULL)
     else{
@@ -70,21 +107,7 @@ server <- function(input, output){
         
         pressure <- input$pressure
         
-        samp_data_prototypeT <- mutate(samp_data_prototypeT,
-                                       X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
-                                       Ca_star_CPX = Nb_ions_Ca_CPX/(1-Nb_ions_Na_CPX),
-                                       Ca_star_OPX = Nb_ions_Ca_OPX/(1-Nb_ions_Na_OPX),
-                                       K_sub_D = (1-Ca_star_CPX)/(1-Ca_star_OPX),
-                                       onehundredtwentysix_times_X_Fe_CPX=126.3*X_Fe_CPX,
-                                       plustwentyfour = onehundredtwentysix_times_X_Fe_CPX+24.9,
-                                       times_pressure = plustwentyfour*pressure,
-                                       T_bacon_numerator = 23664 + times_pressure,
-                                       ln_K_sub_D = log(K_sub_D),
-                                       ln_K_sub_D_SQRD = ln_K_sub_D^2,
-                                       T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
-                                       Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
-                                       Temp_Celsius = Temp_Kelvins-273.15) %>% 
-          filter(!is.na(Temp_Kelvins))
+        
         samp_data_prototypeT
         
         display_table <- select(samp_data_prototypeT,
