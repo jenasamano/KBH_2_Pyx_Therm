@@ -68,9 +68,10 @@ server <- function(input, output){
     # What does this do? I think nothing
     # names(raw_data)[str_detect(names(raw_data),"point_location_CPX")] <- "point_location_CPX"
     
-    processed_data <- switch(input$thermometer,
-                             "Brey-Kohler" = calc_Brey_Kohler_temp(raw_data)
-    )
+    processed_data <- calc_Brey_Kohler_temp(raw_data)
+    # processed_data <- switch(input$thermometer,
+    #                          "Brey-Kohler" = calc_Brey_Kohler_temp(raw_data)
+    # )
     
     # samp_data_prototypeT <- mutate(samp_data_prototypeT,
     #                                X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
