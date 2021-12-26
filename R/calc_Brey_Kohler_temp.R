@@ -25,5 +25,7 @@ calc_Brey_Kohler_temp <- function(df, pressure) {
     Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
     Temp_Celsius = Temp_Kelvins-273.15) 
   
+  write_csv(df_processed, "~/Downloads/_processed_data.csv")
+  
   df_processed
 }

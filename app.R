@@ -50,14 +50,16 @@ server <- function(input, output){
   
   thermometer <- reactive(input$thermometer)
   
+  pressure <- reactive(input$pressure)
+  
   # upload the data separately in its own reactive
-  raw_datafile <- reactive({ 
+  raw_data_file <- reactive({ 
     input$raw_data_file
     # get data file
   })
   
   processed_data <- reactive({
-    process_raw_data(raw_datafile()$filename, thermometer()) # Read data
+    process_raw_data(raw_data_file()$datapath, thermometer(), pressure()) # Read data
   })
   
   # Create table of temperatures
