@@ -8,8 +8,8 @@
 ##' @value The same data frame, with temperature data added
 ##' 
 calc_Brey_Kohler_temp <- function(df, pressure) {
-  stop("In the name of love")
-  df <- df %>% mutate(
+  
+  df_processed <- df %>% mutate(
     X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX),
     X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
     Ca_star_CPX = Nb_ions_Ca_CPX/(1-Nb_ions_Na_CPX),
@@ -23,8 +23,7 @@ calc_Brey_Kohler_temp <- function(df, pressure) {
     ln_K_sub_D_SQRD = ln_K_sub_D^2,
     T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
     Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
-    Temp_Celsius = Temp_Kelvins-273.15) #%>% 
-    #filter(!is.na(Temp_Kelvins))
+    Temp_Celsius = Temp_Kelvins-273.15) 
   
-  df
+  df_processed
 }
