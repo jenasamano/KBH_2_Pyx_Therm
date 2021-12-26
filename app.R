@@ -18,7 +18,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       sliderInput("pressure", "Pressure in kilobars:", min = 1, max = 20, value = 1),
-      fileInput("uploaded_data", "Upload Electron Microprobe data", accept = ".csv"),
+      fileInput("raw_data_file", "Upload Electron Microprobe data", accept = ".csv"),
       thermometer_selector(inputId = "thermometer", label = "In Communist Russia, thermometer choose you"),
       axis_selector(inputId = "x_axis", label = "Left Graph X-axis data"),
       axis_selector(inputId = "y_axis", label = "Left Graph Y-axis data"),
@@ -52,12 +52,12 @@ server <- function(input, output){
   
   # upload the data separately in its own reactive
   raw_datafile <- reactive({ 
-    input$uploaded_data
+    input$raw_data_file
     # get data file
   })
   
   processed_data <- reactive({
-    process_raw_data(raw_datafile(), thermometer()) # Read data
+    process_raw_data(raw_datafile()$filename, thermometer()) # Read data
   })
   
   # Create table of temperatures

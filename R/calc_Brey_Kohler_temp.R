@@ -8,7 +8,7 @@
 ##' @value The same data frame, with temperature data added
 ##' 
 calc_Brey_Kohler_temp <- function(df, pressure) {
-  
+  stop("In the name of love")
   df <- df %>% mutate(
     X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX),
     X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
