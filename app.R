@@ -36,15 +36,13 @@ ui <- fluidPage(
       tabsetPanel(
         id = "tabs",
         tabPanel("Data",
-                 tableOutput(outputId = "processed_data_table"),
-                 #plotOutput(outputId = "location_Temp")),
+                 tableOutput(outputId = "processed_data_table")),
         tabPanel("Plots",
                  plotOutput(outputId = "ternary_plot"),
                  includeMarkdown("ternary_text.md")),
         tabPanel("Instructions", # I'd probably put this text in a separate function. Note also that it isn't using markdown
                  includeMarkdown("instructions.md"),
                  img(src = "example_file.png", height = 213, width = 570))
-      )
     )
   )
 )
