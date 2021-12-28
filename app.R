@@ -3,6 +3,10 @@ library(shiny)
 library(tidyverse)
 #library(patchwork)
 
+rm(list=ls())
+
+debugging <- TRUE
+
 # Load necessary functions. 
 all_r_files <- paste0("R/", dir("R"))
 lapply(all_r_files, source)
@@ -61,9 +65,17 @@ server <- function(input, output){
   })
   
   processed_data <- reactive({
-    #process_raw_data(raw_data_file()$datapath, thermometer(), pressure()) # Read data
-    process_raw_data("~/Documents/work/KBH_2_Pyx_Therm/samp_data-prototypeT.csv", thermometer(), pressure()) 
-    })
+    ###
+    # I've set a debugging boolean to skip uploading the file
+    # Remove this before production
+    ###
+    if(debugging) {
+      process_raw_data("~/Documents/work/KBH_2_Pyx_Therm/samp_data-prototypeT.csv", thermometer(), pressure())
+      warning("TURN OFF DEBUGGING BEFORE PRODUCTION YOU DIRTBAG")
+    } else {
+      process_raw_data(raw_data_file()$datapath, thermometer(), pressure()) # Read data
+    }
+  })
   
   # Create table of temperatures
   output$processed_data_table <- renderTable({
@@ -81,7 +93,7 @@ server <- function(input, output){
     make_ternary_plot(processed_data())
   )
   output$ternary_plot <- renderPlot({
-    tern_plot_obj()
+    print(tern_plot_obj())
   })
 }
 
