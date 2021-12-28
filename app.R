@@ -24,24 +24,26 @@ ui <- fluidPage(
       axis_selector(inputId = "y_axis", label = "Left Graph Y-axis data"),
       show_full_calcs_selector(inputId = "full_table", label = "Show full table of calculations"),
       downloadButton(outputId = "download_data", inputId = "Download Temperature in CSV"),
-      actionButton(inputId = "ternary_plot", label = "Print ternary plot") # THIS IS JUST A TEST
+      actionButton(inputId = "tern_plot_button", label = "Print ternary plot") # THIS IS JUST A TEST
     ),
     
     # Show a table and plot of the generated distribution
     mainPanel(
       tabsetPanel(
         id = "tabs",
-        tabPanel(
-          "Data and Plots",
-          tableOutput(outputId = "processed_data_table"),
-          #plotOutput(outputId = "location_Temp")
-        ),
+        tabPanel("Data",
+                 tableOutput(outputId = "processed_data_table"),
+                 #plotOutput(outputId = "location_Temp")),
+        tabPanel("Plots",
+                 plotOutput(outputId = "ternary_plot"),
+                 includeMarkdown("ternary_text.md")),
         tabPanel("Instructions", # I'd probably put this text in a separate function. Note also that it isn't using markdown
                  includeMarkdown("instructions.md"),
                  img(src = "example_file.png", height = 213, width = 570))
       )
     )
   )
+)
 )
 
 
@@ -59,12 +61,27 @@ server <- function(input, output){
   })
   
   processed_data <- reactive({
-    process_raw_data(raw_data_file()$datapath, thermometer(), pressure()) # Read data
-  })
+    #process_raw_data(raw_data_file()$datapath, thermometer(), pressure()) # Read data
+    process_raw_data("~/Documents/work/KBH_2_Pyx_Therm/samp_data-prototypeT.csv", thermometer(), pressure()) 
+    })
   
   # Create table of temperatures
   output$processed_data_table <- renderTable({
     processed_data()
+  })
+  
+  # Ternary plot with fake data
+  ternary_plot <- reactive(
+    input$ternary_plot
+    #make_ternary_plot(processed_data())
+  )
+  
+  tern_plot_obj <- eventReactive(
+    input$tern_plot_button,
+    make_ternary_plot(processed_data())
+  )
+  output$ternary_plot <- renderPlot({
+    tern_plot_obj()
   })
 }
 
