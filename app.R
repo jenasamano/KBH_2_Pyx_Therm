@@ -1,5 +1,7 @@
 # Add standard deviation info 11/29
-# Is this thing on?
+# make x axis to jave distance or point number assosciated with a distance
+#remove CPX and OPX versions of temps they are the same
+# are CPX and OPX points the same?
 
 library(shiny)
 library(tidyverse)
