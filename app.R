@@ -1,7 +1,12 @@
-# Add standard deviation info 11/29
-# make x axis to jave distance or point number assosciated with a distance
-#remove CPX and OPX versions of temps they are the same
-# are CPX and OPX points the same?
+# Add standard deviation info 11/29, 2/17/22
+#Following error occur. Calcs for temps occur but no plot
+# Listening on http://127.0.0.1:6360
+#Warning: Error in data.frame: argument is missing, with no default
+#169: data.frame
+#168: renderPlot [C:\Users\taraw\OneDrive\Desktop\KBH_2_Pyx_Therm/app.R#212]
+
+
+
 
 library(shiny)
 library(tidyverse)
@@ -19,22 +24,12 @@ ui <- fluidPage(
         sidebarPanel(
             sliderInput("Pressure", "Pressure in kilobars:", min = 1, max = 20, value = 1),
             fileInput("uploaded_data", "Upload Electron Microprobe data", accept = ".csv"),
-            selectInput("x_axis", "Left Graph X-axis data", choices = c("point_location_CPX",
-                                              "point_location_OPX",
-                                              "Temp_Celsius",
-                                              "X_Fe_OPX",
-                                              "X_Fe_CPX",
-                                              "point_number_OPX",
-                                              "point_number_CPX"),
-                        selected = "point_number_CPX"),
+            selectInput("x_axis", "Left Graph X-axis data", choices = c("Distance_cpx",
+                                                                        "Distance_opx"),
+                        selected = "Distance_cpx"),
             
-                        selectInput("y_axis", "Left Graph y-axis data", choices = c("point_location_CPX",
-                                              "point_location_OPX",
-                                              "Temp_Celsius",
-                                              "X_Fe_OPX",
-                                              "X_Fe_CPX",
-                                              "point_number_OPX",
-                                              "point_number_CPX"),
+                        selectInput("y_axis", "Left Graph y-axis data", choices = c("Temp_Kelvins",
+                                                                                    "Temp_Celsius"),
                         selected = "Temp_Celsius"),
             
             
@@ -108,26 +103,22 @@ server <- function(input, output){
         if(is.null(input$uploaded_data)) return(NULL)
         else{
           samp_data_prototypeT <- read.csv(uploaded_file$datapath, header = TRUE) 
-          if(ncol(samp_data_prototypeT)!= 12){
+          if(ncol(samp_data_prototypeT)!= 14){
             print("Incorrect number of columns provided. Please see instructions")
           }
           else{
             
-          
-          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"point_location_CPX")] <- "point_location_CPX"
-       samp_data_prototypeT <- mutate(samp_data_prototypeT,X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
-        samp_data_prototypeT
-
-        Pressure <- input$Pressure
-
-        samp_data_prototypeT <- mutate(samp_data_prototypeT,
-                                       X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
-                                       Ca_star_CPX = Nb_ions_Ca_CPX/(1-Nb_ions_Na_CPX),
-                                       Ca_star_OPX = Nb_ions_Ca_OPX/(1-Nb_ions_Na_OPX),
+            Pressure <- input$Pressure
+          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"Distance_cpx")] <- "Distance_cpx"
+       samp_data_prototypeT <- mutate(samp_data_prototypeT, 
+                                       X_Fe_CPX = Fe_cpx/(Fe_cpx + Mg_cpx),        
+                                       X_Fe_OPX = Fe_opx/(Fe_opx + Mg_opx),
+                                       Ca_star_CPX = Ca_cpx/(1-Na_cpx),
+                                       Ca_star_OPX = Ca_opx/(1-Na_opx),
                                        K_sub_D = (1-Ca_star_CPX)/(1-Ca_star_OPX),
                                        onehundredtwentysix_times_X_Fe_CPX=126.3*X_Fe_CPX,
                                        plustwentyfour = onehundredtwentysix_times_X_Fe_CPX+24.9,
-                                       times_pressure = plustwentyfour*Pressure,
+                                       times_pressure = plustwentyfour*10,
                                        T_bacon_numerator = 23664 + times_pressure,
                                        ln_K_sub_D = log(K_sub_D),
                                        ln_K_sub_D_SQRD = ln_K_sub_D^2,
@@ -138,14 +129,10 @@ server <- function(input, output){
         samp_data_prototypeT
         
         display_table <- select(samp_data_prototypeT,
-                                point_location_CPX,
-                                point_location_OPX,
                                 Temp_Celsius,
                                 Temp_Kelvins,
-                                X_Fe_CPX,
-                                X_Fe_OPX,
-                                point_number_CPX,
-                                point_number_OPX)
+                                Distance_cpx,
+                                Distance_opx)
         if(input$full_table=="yes") samp_data_prototypeT
         else display_table
         }    
@@ -164,43 +151,30 @@ server <- function(input, output){
             read.csv(uploaded_file$datapath, header = TRUE)
           
           
-          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT), "point_location_CPX")] <-
-            "point_location_CPX"
-          samp_data_prototypeT <-
-            mutate(samp_data_prototypeT,
-                   X_Fe_CPX = Nb_ions_Fe_CPX / (Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
-          samp_data_prototypeT
+          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT), "Distance_opx")] <-
+            "Distance_opx"
           
           Pressure <- input$Pressure
           
-          samp_data_prototypeT <- mutate(
-            samp_data_prototypeT,
-            X_Fe_OPX = Nb_ions_Fe_OPX / (Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
-            Ca_star_CPX = Nb_ions_Ca_CPX /
-              (1 - Nb_ions_Na_CPX),
-            Ca_star_OPX = Nb_ions_Ca_OPX /
-              (1 - Nb_ions_Na_OPX),
-            K_sub_D = (1 - Ca_star_CPX) / (1 -
-                                             Ca_star_OPX),
-            onehundredtwentysix_times_X_Fe_CPX =
-              126.3 * X_Fe_CPX,
-            plustwentyfour = onehundredtwentysix_times_X_Fe_CPX +
-              24.9,
-            times_pressure = plustwentyfour *
-              Pressure,
-            T_bacon_numerator = 23664 + times_pressure,
-            ln_K_sub_D = log(K_sub_D),
-            ln_K_sub_D_SQRD = ln_K_sub_D ^
-              2,
-            T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
-            Temp_Kelvins = T_bacon_numerator /
-              T_bacon_denominator,
-            Temp_Celsius = Temp_Kelvins - 273.15
-          ) %>% 
-            filter(!is.na(Temp_Kelvins))}
+          samp_data_prototypeT <- mutate(samp_data_prototypeT,
+                                         X_Fe_CPX = Fe_cpx/(Fe_cpx + Mg_cpx),        
+                                         X_Fe_OPX = Fe_opx/(Fe_opx + Mg_opx),
+                                         Ca_star_CPX = Ca_cpx/(1-Na_cpx),
+                                         Ca_star_OPX = Ca_opx/(1-Na_opx),
+                                         K_sub_D = (1-Ca_star_CPX)/(1-Ca_star_OPX),
+                                         onehundredtwentysix_times_X_Fe_CPX=126.3*X_Fe_CPX,
+                                         plustwentyfour = onehundredtwentysix_times_X_Fe_CPX+24.9,
+                                         times_pressure = plustwentyfour*10,
+                                         T_bacon_numerator = 23664 + times_pressure,
+                                         ln_K_sub_D = log(K_sub_D),
+                                         ln_K_sub_D_SQRD = ln_K_sub_D^2,
+                                         T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
+                                         Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
+                                         Temp_Celsius = Temp_Kelvins-273.15) %>% 
+          filter(!is.na(Temp_Kelvins))}
           write.csv(samp_data_prototypeT, file, row.names = FALSE)
         }
-    )
+        )
     output$location_Temp <- renderPlot({
       uploaded_file <- input$uploaded_data
       
@@ -208,27 +182,26 @@ server <- function(input, output){
       else{
         samp_data_prototypeT <- read.csv(uploaded_file$datapath, header = TRUE) 
         
+        Pressure <- input$Pressure
           
-          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"point_location_CPX")] <- "point_location_CPX"
-          samp_data_prototypeT <- mutate(samp_data_prototypeT,X_Fe_CPX = Nb_ions_Fe_CPX/(Nb_ions_Fe_CPX + Nb_ions_Mg_CPX))
-          samp_data_prototypeT
-          
-          Pressure <- input$Pressure
-          
-          samp_data_prototypeT <- mutate(samp_data_prototypeT,
-                                         X_Fe_OPX = Nb_ions_Fe_OPX/(Nb_ions_Fe_OPX + Nb_ions_Mg_OPX),
-                                         Ca_star_CPX = Nb_ions_Ca_CPX/(1-Nb_ions_Na_CPX),
-                                         Ca_star_OPX = Nb_ions_Ca_OPX/(1-Nb_ions_Na_OPX),
+          names(samp_data_prototypeT)[str_detect(names(samp_data_prototypeT),"Distance_cpx")] <- "Distance_cpx"
+          samp_data_prototypeT <- mutate(new_tble_format_temp_tool,
+                                         X_Fe_CPX = Fe_cpx/(Fe_cpx + Mg_cpx),        
+                                         X_Fe_OPX = Fe_opx/(Fe_opx + Mg_opx),
+                                         Ca_star_CPX = Ca_cpx/(1-Na_cpx),
+                                         Ca_star_OPX = Ca_opx/(1-Na_opx),
                                          K_sub_D = (1-Ca_star_CPX)/(1-Ca_star_OPX),
                                          onehundredtwentysix_times_X_Fe_CPX=126.3*X_Fe_CPX,
                                          plustwentyfour = onehundredtwentysix_times_X_Fe_CPX+24.9,
-                                         times_pressure = plustwentyfour*Pressure,
+                                         times_pressure = plustwentyfour*10,
                                          T_bacon_numerator = 23664 + times_pressure,
                                          ln_K_sub_D = log(K_sub_D),
                                          ln_K_sub_D_SQRD = ln_K_sub_D^2,
                                          T_bacon_denominator = 13.38 + ln_K_sub_D_SQRD + (11.59 * X_Fe_OPX),
                                          Temp_Kelvins = T_bacon_numerator/T_bacon_denominator,
-                                         Temp_Celsius = Temp_Kelvins-273.15)
+                                         Temp_Celsius = Temp_Kelvins-273.15
+                                         )
+    
         
         r_x_axis <- reactive({
           r_x_axis <- as.symbol(input$x_axis)
@@ -241,30 +214,19 @@ server <- function(input, output){
           })
         
        
-        x_axis_names <- data.frame(column_names=c("point_location_CPX",
-          "point_location_OPX",
-          "Temp_Celsius",
-          "X_Fe_OPX",
-          "X_Fe_CPX",
-          "point_number_OPX",
-          "point_number_CPX"),
-          x_axis_names=c("Location of Point CPX","Location of Point OPX",
-                       "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
-                       "Point number OPX", "Point number CPX"))
+        x_axis_names <- data.frame(column_names=c("Distance_cpx",
+          "Distance_opx"),
+            )
+         x_axis_names=c("Distance in microns of cpx values","Distance in microns of opx values",
+                       )
         x_axis_label <- x_axis_names[x_axis_names$column_names==input$x_axis,"x_axis_names"]
         
        
         #DO for y-axis what you did for x-axis with this code"
-        y_axis_names <- data.frame(column_names=c("point_location_CPX",
-                                                "point_location_OPX",
-                                                "Temp_Celsius",
-                                                "X_Fe_OPX",
-                                                "X_Fe_CPX",
-                                                "point_number_OPX",
-                                                "point_number_CPX"),
-                                 y_axis_names=c("Location of Point CPX","Location of Point OPX",
-                                              "Temperature in Celsius", "X of Fe OPX", "X of Fe CPX",
-                                              "Point number OPX", "Point number CPX"))
+        y_axis_names <- data.frame(column_names=c("Temp_Kelvins",
+                                                "Temp_Celsius"),
+                                                )
+                                 y_axis_names=c("Temperature in Celsius", "Temperature in Kelvins")
         y_axis_label <- y_axis_names[y_axis_names$column_names==input$y_axis,"y_axis_names"]
         
       plot_1 <- ggplot(samp_data_prototypeT,aes(x= !!r_x_axis(), y = !!r_y_axis()))+
